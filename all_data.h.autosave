@@ -1,0 +1,45 @@
+#ifndef WORKERS_DATA_H
+#define WORKERS_DATA_H
+
+#include "kmp.h"
+
+#include <string>
+#include <queue>
+#include <mutex>
+#include <atomic>
+#include <condition_variable>
+#include <experimental/filesystem>
+
+class all_data
+{
+public:
+    all_data();
+
+    std::queue<std::pair<std::string, size_t> > qresult;
+    std::mutex mresult;
+    std::queue<std::pair<std::experimental::filesystem::path, size_t> > qreq;
+    std::mutex mreq;
+
+    std::mutex mspec;
+    size_t epoch = 0;
+    std::string spec_path;
+    std::string spec_text;
+    bool is_canceled_spec = false;
+
+    KMP kmp {""};
+    std::mutex mkmp;
+
+    bool is_ready_write = false;
+    bool status_ready = true;
+
+    std::atomic_size_t workers_done {0};
+    std::condition_variable wodrker_update;
+
+    std::mutex mboss_update;
+    bool is_boss_updated = false;
+    std::condition_variable boss_update;
+
+    void update_boss();
+};
+
+#endif // WORKERS_DATA_H
